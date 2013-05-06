@@ -1,9 +1,39 @@
 #Input: data = an d X n data matrix, d being the dimensionality of the data,
 #and n being the number of data points, 
 #k = the number of clusters you want
-"INITIALIZATION METHOD: Chooses k random data points, and assigns a centroid
-to each one."
-initialize_centroids = function(data, k){
+
+kMeans = function(data, k, threshold){
+	seed_centroids = initializeCentroids(data, k)
+	print(seed_centroids)
+
+	final_centroids = assignAndUpdate(data, seed_centroids, threshold)
+	return(final_centroids)
+}
+
+assignAndUpdate = function(data, centroids, threshold, iter_count = 1){
+
+
+
+	with_clusters = assignClusters(data, centroids)
+	new_centroids = updateCentroids(with_clusters, centroids)
+
+	distances_moved = sqrt(colSums((new_centroids - centroids)^2))
+	check_distances = distances_moved < threshold
+
+	if(sum(check_distances) == length(check_distances)){
+		print("Clusters converged. Number of iterations: ")
+		print(iter_count)
+		return(new_centroids)
+	}
+	#recursion
+	iter_count = iter_count + 1
+	assignAndUpdate(data, new_centroids, threshold, iter_count)
+}
+
+
+"INITIALIZATION METHOD: Chooses k random data points, and initializes a
+seed centroid at each one."
+initializeCentroids = function(data, k){
 	n = dim(data)[2]
 	d = dim(data)[1]
 
@@ -14,6 +44,8 @@ initialize_centroids = function(data, k){
 
 "returns a vector containing a given point's distance to all the
 centroids indexed by centroid."
+
+
 assignedCentroid = function(point, centroids){
 
 	distances = sqrt(colSums((centroids - point)^2))
@@ -45,7 +77,6 @@ updateCentroids = function(with_clusters, centroids){
 	}
 	return(new_centroids)
 }
-
 
 
 
