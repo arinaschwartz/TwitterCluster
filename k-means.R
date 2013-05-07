@@ -4,15 +4,28 @@
 
 kMeans = function(data, k, threshold){
 	seed_centroids = initializeCentroids(data, k)
-	print(seed_centroids)
+	final_clusters = assignAndUpdate(data, seed_centroids, threshold)
+	return(final_clusters)
+}
 
-	final_centroids = assignAndUpdate(data, seed_centroids, threshold)
-	return(final_centroids)
+summaryStats = function(final_list){
+	data = final_list[[1]]
+	k = dim(data)[2]
+	d = dim(data)[1] - 1
+
+	centroids = final_list[[2]]
+
+	for(i in 1:dim(centroids)[2]){
+		sprintf("Percentage of players in cluster %i:", i)
+		this_cluster = data[,data[d+1,] == i]
+		percentage = dim(this_cluster)[2]/dim(data)[2]
+		print(percentage)
+	}
+
+
 }
 
 assignAndUpdate = function(data, centroids, threshold, iter_count = 1){
-
-
 
 	with_clusters = assignClusters(data, centroids)
 	new_centroids = updateCentroids(with_clusters, centroids)
@@ -23,7 +36,7 @@ assignAndUpdate = function(data, centroids, threshold, iter_count = 1){
 	if(sum(check_distances) == length(check_distances)){
 		print("Clusters converged. Number of iterations: ")
 		print(iter_count)
-		return(new_centroids)
+		return(list(assignClusters(data, new_centroids), new_centroids))
 	}
 	#recursion
 	iter_count = iter_count + 1
@@ -71,7 +84,7 @@ updateCentroids = function(with_clusters, centroids){
 	d = dim(with_clusters)[1] - 1
 	new_centroids = matrix(nrow = dim(centroids)[1], ncol = dim(centroids)[2])
 	for(cluster in c(1:k)){
-		this_cluster = with_clusters[,with_clusters[3,] == cluster]
+		this_cluster = with_clusters[,with_clusters[d+1,] == cluster]
 		new_mean = rowMeans(this_cluster)
 		new_centroids[,cluster] = new_mean[1:d]
 	}
@@ -96,3 +109,23 @@ vis = function(data, centroids){
 	#points(centroids, pch = 21, bg = sample(colours(), k), cex = 3)
 
 }
+
+getData = function(filename){
+	data = as.matrix(read.csv(filename))
+	just_numbers = data[,7:23]
+	class(just_numbers) = 'numeric'
+	just_numbers[is.na(just_numbers)] = 0
+	colMaxes = apply(just_numbers, 2, max)
+	colMins = apply(just_numbers, 2, min)
+	normalizer = colMaxes - colMins
+
+	for(i in 1:dim(just_numbers)[1]){
+		just_numbers[i,] = (just_numbers[i,] - colMins)/normalizer
+	}
+	return(t(just_numbers))
+
+}
+
+test_data = getData('player_regular_season.txt')
+clusters = kMeans(test_data, 14, .01)
+summaryStats(clusters)
