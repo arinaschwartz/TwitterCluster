@@ -1,5 +1,0 @@
-Simply loading the file in R will run an initial clustering of the data using fourteen clusters.
-
-R will print a simple summary showing the percentage of players assigned to each cluster.
-
-The function calls themselves are at the bottom of the file. getData() loads the data into R from the test dataset. kMeans() performs the clustering itself, and assigns the final results to a variable called "clusters." "Clusters" is a list, the first element being the matrix of the data and the assigned clusters, and the second being the final centroids themselves. summaryStats() prints out, for each cluster, the percentage of players assigned to it. If you've got any questions of course don't hesitate to ask.
